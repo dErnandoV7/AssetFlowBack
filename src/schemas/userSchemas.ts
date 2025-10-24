@@ -1,78 +1,56 @@
 import { z } from "zod"
 
+const userIdParams = z.object({
+    id:
+        z.string()
+            .refine(
+                (id) => !isNaN(Number(id)) && Number.isInteger(Number(id)),
+                "O ID do usuário deve ser um número inteiro."
+            )
+})
+
+const userEmailInBody = z.string()
+    .email("O formato do email está inválido.")
+    .min(1, "O email do usuário não pode ser vazio.")
+    .transform((v) => v.toLowerCase())
+
+const userNameInBody = z.string()
+    .min(1, "O nome do usuário não pode ser vazio.")
+
+const userPasswordInBody = z.string()
+    .min(8, "A senha do usuário deve ter no mínimo 8 caracteres.")
+
 export const createUserSchema = z.object({
     body: z.object({
-        name:
-            z.string()
-                .min(1, "O nome do usuário não pode ser vazio."),
-        email:
-            z.string()
-                .email("O formato do email está inválido.")
-                .min(1, "O email do usuário não pode ser vazio.")
-                .transform((v) => v.toLowerCase()),
-        password:
-            z.string()
-                .min(8, "A senha do usuário deve ter no mínimo 8 caracteres.")
+        name: userNameInBody,
+        email: userEmailInBody,
+        password: userPasswordInBody
     })
 })
 
 export const updateUserSchema = z.object({
-    params: z.object({
-        id:
-            z.string()
-                .refine(
-                    (id) => !isNaN(Number(id)) && Number.isInteger(Number(id)),
-                    "O ID do usuário deve ser um número inteiro."
-                )
-    }),
+    params: userIdParams,
 
     body: z.object({
-        name:
-            z.string()
-                .min(1, "O nome do usuário não pode ser vazio.")
-                .optional(),
-        email:
-            z.string()
-                .email("O formato do email está inválido.")
-                .min(1, "O email do usuário não pode ser vazio.")
-                .transform((v) => v.toLowerCase())
-                .optional(),
-        password:
-            z.string()
-                .min(8, "A senha do usuário deve ter no mínimo 8 caracteres.")
-                .optional()
+        name: userNameInBody.optional(),
+
+        email: userEmailInBody.optional(),
+
+        password: userPasswordInBody.optional()
     })
 })
 
 export const deleteUserSchema = z.object({
-    params: z.object({
-        id:
-            z.string()
-                .refine(
-                    (id) => !isNaN(Number(id)) && Number.isInteger(Number(id)),
-                    "O ID do usuário deve ser um número inteiro."
-                )
-    })
+    params: userIdParams,
 })
 
 export const getUserByIdSchema = z.object({
-    params: z.object({
-        id:
-            z.string()
-                .refine(
-                    (id) => !isNaN(Number(id)) && Number.isInteger(Number(id)),
-                    "O ID do usuário deve ser um número inteiro."
-                )
-    })
+    params: userIdParams,
 })
 
 export const loginUserSchema = z.object({
     body: z.object({
-        email:
-            z.string()
-                .email("O formato do email está inválido.")
-                .min(1, "O email do usuário não pode ser vazio.")
-                .transform((v) => v.toLowerCase()),
+        email: userEmailInBody,
         password:
             z.string()
                 .min(1, "Valor de senha inválido.")

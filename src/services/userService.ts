@@ -48,7 +48,10 @@ export const UserService = {
             userData.password = await hashPassword(userData.password)
         }
 
-        const updatedUser = await UserRepository.updateUser(userData, userId)
+        const updatedUser = await UserRepository.updateUser({
+            email: userData.email,
+            name: userData.name
+        }, userId)
 
         return updatedUser
     },
