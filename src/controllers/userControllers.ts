@@ -1,6 +1,6 @@
 import { UserService } from "../services/userService";
 import { Request, Response, NextFunction } from "express"
-import { CreateUserSchema, DeleteUserSchema, GetUserByIdSchema, UpdateUserSchema } from "../schemas/UserSchemas";
+import { CreateUserSchema, DeleteUserSchema, GetUserByIdSchema, UpdateUserSchema, LoginUserSchema } from "../schemas/userSchemas"
 
 export const UserController = {
     async createUser(req: Request, res: Response, next: NextFunction) {
@@ -74,6 +74,23 @@ export const UserController = {
                 message: `Usuário ID ${id} foi encontrado com sucesso!`,
                 user
             })
+        } catch (error) {
+            next(error)
+        }
+    },
+
+    async loginUser(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { email, password } = req.body as LoginUserSchema
+
+            const validateEmailAndPassword = await UserService.loginUser(email, password)
+
+            return res.status(200).json({
+                message: "Usuário logado com sucesso.",
+                user: validateEmailAndPassword.user,
+                token: validateEmailAndPassword.token
+            })
+
         } catch (error) {
             next(error)
         }

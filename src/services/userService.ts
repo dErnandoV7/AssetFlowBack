@@ -2,7 +2,7 @@ import { UserRepository } from "../repositories/userRepository";
 import { CreateUserData, UpdateUserData, UserData } from "../types/userTypes";
 import { hashPassword, comparePassword } from "../utils/hashUtils"
 import { BadRequest, NotFoundError, ConflictError } from "../utils/errorUtils";
-import { User } from "@prisma/client";
+import { authUtil } from "../utils/jwtUtils";
 
 export const UserService = {
     async createUser(userData: UserData) {
@@ -61,5 +61,24 @@ export const UserService = {
         await UserRepository.deleteUser(userId)
 
         return { id: existingUser.id, name: existingUser.name }
+    },
+
+    async loginUser(email: string, password: string) {
+        const user = await UserRepository.findByEmailForValidationUser(email)
+
+        if (!user) throw new NotFoundError("Email ou senha incorretos.")
+
+        const validPassword = await comparePassword(password, user.password)
+
+        if (!validPassword) throw new NotFoundError("Email ou senha incorretos.")
+
+        const token = authUtil.generateToken({ id: user.id, email: user.email })
+
+        return {
+            user: {
+                id: user.id, name: user.name, email: user.email
+            },
+            token
+        }
     }
 }

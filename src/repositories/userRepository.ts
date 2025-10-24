@@ -24,6 +24,18 @@ export const UserRepository = {
         })
     },
 
+    async findByEmailForValidationUser(email: string) {
+        return prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                email: true,
+                password: true,
+                name: true
+            }
+        })
+    },
+
     async createUser(userData: UserData) {
         return prisma.user.create({
             select: {
@@ -60,5 +72,6 @@ export const UserRepository = {
 
     async deleteUser(id: number) {
         return prisma.user.delete({ where: { id } })
-    }
+    },
+
 }

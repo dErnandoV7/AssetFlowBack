@@ -9,7 +9,7 @@ export const createUserSchema = z.object({
             z.string()
                 .email("O formato do email está inválido.")
                 .min(1, "O email do usuário não pode ser vazio.")
-                .transform((v) => v.toLocaleLowerCase()),
+                .transform((v) => v.toLowerCase()),
         password:
             z.string()
                 .min(8, "A senha do usuário deve ter no mínimo 8 caracteres.")
@@ -35,7 +35,7 @@ export const updateUserSchema = z.object({
             z.string()
                 .email("O formato do email está inválido.")
                 .min(1, "O email do usuário não pode ser vazio.")
-                .transform((v) => v.toLocaleLowerCase())
+                .transform((v) => v.toLowerCase())
                 .optional(),
         password:
             z.string()
@@ -66,6 +66,19 @@ export const getUserByIdSchema = z.object({
     })
 })
 
+export const loginUserSchema = z.object({
+    body: z.object({
+        email:
+            z.string()
+                .email("O formato do email está inválido.")
+                .min(1, "O email do usuário não pode ser vazio.")
+                .transform((v) => v.toLowerCase()),
+        password:
+            z.string()
+                .min(1, "Valor de senha inválido.")
+    })
+})
+
 export type CreateUserSchema = z.infer<typeof createUserSchema>["body"]
 export type UpdateUserSchema = {
     params: z.infer<typeof updateUserSchema>["params"],
@@ -73,3 +86,4 @@ export type UpdateUserSchema = {
 }
 export type DeleteUserSchema = z.infer<typeof deleteUserSchema>["params"]
 export type GetUserByIdSchema = z.infer<typeof getUserByIdSchema>["params"]
+export type LoginUserSchema = z.infer<typeof loginUserSchema>["body"]

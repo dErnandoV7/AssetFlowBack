@@ -1,0 +1,26 @@
+import jwt from "jsonwebtoken"
+import { BadRequest } from "./errorUtils";
+
+const SECRET_KEY = process.env.SECRET_KEY || "chave_secreta"
+
+interface TokenPayload {
+    id: number;
+    email: string;
+}
+
+export const authUtil = {
+    verifyToken(token: string): TokenPayload {
+        try {
+            const payload = jwt.verify(token, SECRET_KEY)
+            return payload as TokenPayload
+        } catch (error) {
+            throw new BadRequest("Token de autenticação inválido ou expirado.")
+        }
+    },
+
+    generateToken(payload: TokenPayload): string {
+        return jwt.sign(payload, SECRET_KEY, {
+            expiresIn: "7d"
+        })
+    }
+}
