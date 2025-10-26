@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import userRouter from "./routes/userRouter"
 import walletRouter from "./routes/walletRouter"
 import assetRouter from "./routes/assetRouter"
+import assetIdentityRouter from "./routes/assetIdentityRouter"
 
 import { errorHandler } from './middlewares/errorMiddleware';
 
@@ -17,6 +18,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use("/", userRouter)
 app.use("/", walletRouter)
 app.use("/", assetRouter)
+app.use("/", assetIdentityRouter)
 
 app.use(errorHandler)
 

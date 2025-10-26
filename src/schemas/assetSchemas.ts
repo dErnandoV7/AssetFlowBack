@@ -11,13 +11,12 @@ const assetIdParams = z.object({
 
 const assetWalletAndAssetId = z.string()
     .refine((n) => !isNaN(Number(n)) && Number.isInteger(Number(n)), "O ID da carteira deve ser um numero inteiro")
-    // .transform((n) => Number(n))
 
 export const createAssetSchema = z.object({
     body: z.object({
-        name:
-            z.string()
-                .min(1, "O nome do Ativo não pode ser vazio"),
+        identifyId:
+            z.number()
+                .refine((n) => Number.isInteger(n), "O ID da Ativo deve ser um numero inteiro"),
 
         quantity:
             z.number()
@@ -33,25 +32,6 @@ export const createAssetSchema = z.object({
     })
 })
 
-export const updateAssetSchema = z.object({
-    params: assetIdParams,
-    body: z.object({
-        name:
-            z.string()
-                .min(1, "O nome do Ativo não pode ser vazio")
-                .optional(),
-
-        quantity:
-            z.number()
-                .refine((n) => n >= 0, "A quantidade de ativos não pode ser um número negativo.")
-                .optional(),
-
-        purchasePrice:
-            z.number()
-                .refine((n) => n >= 0, "O preço de compra não pode ser um número negativo.")
-                .optional(),
-    })
-})
 
 export const deleteAssetSchema = z.object({
     params: assetIdParams,
@@ -59,7 +39,8 @@ export const deleteAssetSchema = z.object({
 
 export const getAssetsSchema = z.object({
     query: z.object({
-        walletId: assetWalletAndAssetId,
+        walletId: assetWalletAndAssetId
+        .optional(),
     })
 })
 
@@ -74,10 +55,6 @@ export const getAssetSchema = z.object({
 })
 
 export type CreateAssetSchema = z.infer<typeof createAssetSchema>["body"]
-export type UpdateAssetSchema = {
-    body: z.infer<typeof updateAssetSchema>["body"],
-    params: z.infer<typeof updateAssetSchema>["params"],
-}
 export type DeleteAssetSchema = z.infer<typeof deleteAssetSchema>["params"]
 
 export type GetAssetsSchemaQuery = z.infer<typeof getAssetsSchema>["query"]

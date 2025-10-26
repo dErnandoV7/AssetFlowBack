@@ -1,8 +1,8 @@
 export interface CreateAsset {
-    name: string,
+    identifyId: number,
     quantity: number,
     purchasePrice: number,
-    walletId: number
+    walletId: number,
 }
 
 export interface UpdateAsset {

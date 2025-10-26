@@ -1,8 +1,10 @@
 import { AssetRepository } from "../repositories/assetRepository";
 import { WalletRepository } from "../repositories/walletRepository";
-import { CreateAsset, UpdateAsset } from "../types/assetTypes";
+import { AssetIdentityRepository } from "../repositories/assetIdentityRepository";
+import { CreateAsset } from "../types/assetTypes";
 import { ConflictError, NotFoundError } from "../utils/errorUtils";
 import { checkSignature } from "../utils/checkSignatureUtil";
+import { Prisma } from "@prisma/client";
 
 export const AssetService = {
     async createAsset(assetData: CreateAsset, walletId: number, userId: number) {
@@ -12,52 +14,30 @@ export const AssetService = {
 
         checkSignature({ id: userId, name: "Usuário" }, { id: existingWallet.userId, name: "Carteira" })
 
-        const { name } = assetData
-        const existingAssetUsingName = await AssetRepository.getAsset({
+        const { identifyId } = assetData
+        const assetIdentify = await AssetIdentityRepository.findById(identifyId)
+
+        if (!assetIdentify) throw new ConflictError(`Tipo de ativo não encontrado.`)
+
+        const existingAssetUsingAssetIdentify = await AssetRepository.getAsset({
             wallet: {
                 id: existingWallet.id
             },
-            name: name,
+            identifyId: assetIdentify.id
         })
 
-        if (existingAssetUsingName) throw new ConflictError("Este nome de Ativo já existe nesta carteira, tente outro.")
+        if (existingAssetUsingAssetIdentify) throw new ConflictError("Este identificador de Ativo já existe nesta carteira, tente outro.")
 
-        const createdAsset = await AssetRepository.createAsset(assetData)
-
-        return createdAsset
-    },
-
-    async updateAsset(assetData: UpdateAsset, assetId: number, userId: number) {
-        const existingAsset = await AssetRepository.getAsset({ id: assetId })
-
-        if (!existingAsset) throw new NotFoundError("Não existe Ativo vinculado ao ID informado.")
-
-        const wallet = await WalletRepository.findById(existingAsset.walletId)
-
-        if (!wallet) throw new NotFoundError("Não foi possivel localizar a carteira, ela pode ser sido removida.")
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: wallet.userId, name: "Carteira" })
-
-        if (assetData.name) {
-            const existingAssetUsingName = await AssetRepository.getAsset({
-                wallet: {
-                    id: wallet.id
-                },
-                name: assetData.name,
-            })
-
-            if (existingAssetUsingName && existingAssetUsingName.id !== assetId) {
-                throw new ConflictError("Este nome de Ativo já existe nesta carteira, tente outro.")
-            }
+        const asset = {
+            purchasePrice: assetData.purchasePrice,
+            quantity: assetData.quantity,
+            walletId: assetData.walletId,
+            identifyId: assetIdentify.id
         }
 
-        const updatedAsset = await AssetRepository.updateAsset({
-            name: assetData.name,
-            purchasePrice: assetData.purchasePrice,
-            quantity: assetData.quantity
-        }, assetId)
+        const createdAsset = await AssetRepository.createAsset(asset)
 
-        return updatedAsset
+        return createdAsset
     },
 
     async deleteAsset(assetId: number, userId: number) {
@@ -65,23 +45,34 @@ export const AssetService = {
 
         if (!existingAsset) throw new NotFoundError("Não existe Ativo vinculado ao ID informado.")
 
-        const wallet = await WalletRepository.findById(existingAsset.walletId)
-
-        if (!wallet) throw new NotFoundError("Não foi possivel localizar a carteira, ela pode ser sido removida.")
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: wallet.userId, name: "Carteira" })
+        checkSignature({ id: userId, name: "Usuário" }, { id: existingAsset.wallet.userId, name: "Carteira" })
 
         await AssetRepository.deleteAsset(assetId)
     },
 
     async getAssets(walletId: number, userId: number) {
-        const existingWallet = await WalletRepository.findById(walletId)
+        let where: any = {}
 
-        if (!existingWallet) throw new NotFoundError(`Não existe Carteira vinculada ao ID ${walletId}.`)
+        if (walletId) {
+            const existingWallet = await WalletRepository.findById(walletId)
 
-        checkSignature({ id: userId, name: "Usuário" }, { id: existingWallet.userId, name: "Carteira" })
+            if (!existingWallet) throw new NotFoundError(`Não existe Carteira vinculada ao ID ${walletId}.`)
 
-        const assets = await AssetRepository.getAssets(walletId)
+            checkSignature({ id: userId, name: "Usuário" }, { id: existingWallet.userId, name: "Carteira" })
+
+
+            where = {
+                walletId: walletId
+            }
+        } else {
+            where = {
+                wallet: {
+                    userId: userId
+                }
+            }
+        }
+
+        const assets = await AssetRepository.getAssets(where)
 
         return assets
     },

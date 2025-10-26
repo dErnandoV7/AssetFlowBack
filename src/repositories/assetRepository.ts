@@ -1,12 +1,16 @@
 import { prisma } from "../config/database"
-import { CreateAsset, UpdateAsset } from "../types/assetTypes"
+import { CreateAsset } from "../types/assetTypes"
 
 export const AssetRepository = {
     async createAsset(assetData: CreateAsset) {
         return prisma.asset.create({
             data: assetData,
             select: {
-                name: true,
+                identify: {
+                    select: {
+                        symbol: true
+                    }
+                },
                 quantity: true,
                 purchasePrice: true,
                 walletId: true
@@ -16,25 +20,15 @@ export const AssetRepository = {
 
     async getAsset(where: any) {
         return prisma.asset.findFirst({
-            where: where
-        })
-    },
-
-    async getAssets(walletId: number) {
-        return prisma.asset.findMany({ where: { walletId } })
-    },
-
-    async updateAsset(assetData: UpdateAsset, id: number) {
-        return prisma.asset.update({
-            where: { id },
-            data: assetData,
-            select: {
-                name: true,
-                quantity: true,
-                purchasePrice: true,
-                walletId: true
+            where: where,
+            include: {
+                wallet: true
             }
         })
+    },
+
+    async getAssets(where: any) {
+        return prisma.asset.findMany({ where: where })
     },
 
     async deleteAsset(id: number) {

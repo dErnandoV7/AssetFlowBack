@@ -11,7 +11,7 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
-  password String
+  password  String
   wallets   Wallet[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -30,7 +30,8 @@ model Wallet {
 
 model Asset {
   id            Int           @id @default(autoincrement())
-  name          String
+  identify      AssetIdentity @relation(fields: [identifyId], references: [id])
+  identifyId    Int
   quantity      Float
   purchasePrice Float
   walletId      Int
@@ -38,6 +39,8 @@ model Asset {
   transactions  Transaction[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
+  @@unique([identifyId, walletId])
 }
 
 model Transaction {
@@ -45,13 +48,20 @@ model Transaction {
   assetId   Int
   asset     Asset           @relation(fields: [assetId], references: [id])
   type      TransactionType
-  date      DateTime
+  date      DateTime        @default(now())
   quantity  Float
   price     Float
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 }
-  
+
+model AssetIdentity {
+  id            Int     @id @default(autoincrement())
+  symbol        String  @unique
+  canonicalName String  
+  assets        Asset[]
+}
+
 enum WalletType {
   investment
   savings
