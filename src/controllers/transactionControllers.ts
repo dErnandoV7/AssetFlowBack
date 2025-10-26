@@ -1,15 +1,15 @@
-import { AssetIdentityService } from "../services/assetIdentityService";
+import { TransactionService } from "../services/transactionService";
 import { Request, Response, NextFunction } from "express";
-import { TransferAssetSchema, BuyAssetSchema, SellAssetSchema } from "../schemas/assetIdentitySchemas";
+import { TransferAssetSchema, BuyAssetSchema, SellAssetSchema, GetAllTransferSchema } from "../schemas/transactionSchemas";
 
-export const AssetIdentityControllers = {
+export const TransactionControllers = {
     async transferAsset(req: Request, res: Response, next: NextFunction) {
         const userId = res.locals.userId
 
         try {
             const { identifyId, quantity, sourceAssetId, sourceWalletId, targetWalletId } = req.body as TransferAssetSchema
 
-            const transaction = await AssetIdentityService.transferAsset({ identifyId, quantity, sourceAssetId, sourceWalletId, targetWalletId }, userId)
+            const transaction = await TransactionService.transferAsset({ identifyId, quantity, sourceAssetId, sourceWalletId, targetWalletId }, userId)
 
             return res.status(201).json({
                 message: "Transação realizada com sucesso!",
@@ -27,7 +27,7 @@ export const AssetIdentityControllers = {
         try {
             const { assetId, price, quantity } = req.body as SellAssetSchema
 
-            const { transfer, updatedAsset } = await AssetIdentityService.sellAsset({ assetId, price, quantity }, userId)
+            const { transfer, updatedAsset } = await TransactionService.sellAsset({ assetId, price, quantity }, userId)
 
             const { price: priceSell, quantity: quantitySell } = transfer
             const { purchasePrice: priceBuy } = updatedAsset
@@ -54,7 +54,7 @@ export const AssetIdentityControllers = {
         try {
             const { identifyId, price, quantity, walletId } = req.body as BuyAssetSchema
 
-            const { asset, transfer } = await AssetIdentityService.buyAsset({ identifyId, price, quantity, walletId }, userId)
+            const { asset, transfer } = await TransactionService.buyAsset({ identifyId, price, quantity, walletId }, userId)
 
             return res.status(201).json({
                 message: "Compra realizada com sucesso!",
@@ -66,4 +66,23 @@ export const AssetIdentityControllers = {
             next(error)
         }
     },
+
+    async getAllTransfer(req: Request, res: Response, next: NextFunction) {
+        const userId = res.locals.userId
+
+        try {
+            const { filterValue, typeFilter, page, pageSize } = req.body as GetAllTransferSchema
+
+            const { count, transactions } = await TransactionService.getAllTransfer({ filterValue, typeFilter, page, pageSize }, userId)
+
+            return res.status(200).json({
+                message: "Transferências buscadas com sucesso.",
+                transfers: transactions,
+                total: count 
+            })
+            
+        } catch (error) {
+            next(error)
+        }
+    }
 }

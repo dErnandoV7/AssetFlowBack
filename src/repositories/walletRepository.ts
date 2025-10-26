@@ -2,7 +2,7 @@ import { prisma } from "../config/database"
 import { CreateWallet, UpdateWallet } from "../types/walletTypes"
 
 export const WalletRepository = {
-    async createWallet(walletData: CreateWallet) {
+    async createWallet(walletData: CreateWallet, userId: number) {
         return prisma.wallet.create({
             select: {
                 id: true,
@@ -10,13 +10,16 @@ export const WalletRepository = {
                 type: true,
                 userId: true
             },
-            data: walletData
+            data: { ...walletData, userId }
         })
     },
 
-    async findById(id: number) {
+    async findById(walletId: number, userId: number) {
         return prisma.wallet.findUnique({
-            where: { id },
+            where: {
+                id: walletId,
+                userId
+            },
             select: {
                 id: true,
                 name: true,

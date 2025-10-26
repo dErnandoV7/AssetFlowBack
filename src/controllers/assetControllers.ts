@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
 import { AssetService } from "../services/assetService";
-import { CreateAssetSchema, DeleteAssetSchema, GetAssetSchemaParams, GetAssetSchemaQuery, GetAssetsSchemaQuery } from "../schemas/assetSchemas";
+import { CreateAssetSchema, DeleteAssetSchema, GetAssetSchemaParams, GetAssetsSchemaQuery, GetAssetsSchemaBody } from "../schemas/assetSchemas";
 
 export const AssetControllers = {
     async createAsset(req: Request, res: Response, next: NextFunction) {
@@ -41,9 +41,10 @@ export const AssetControllers = {
     async getAssets(req: Request, res: Response, next: NextFunction) {
         const userId = res.locals.userId
         try {
+            const { cursorId, orderBy, walletType, direction } = req.body as GetAssetsSchemaBody
             const { walletId } = req.query as GetAssetsSchemaQuery
 
-            const assets = await AssetService.getAssets(Number(walletId), userId)
+            const assets = await AssetService.getAssets({ cursorId, orderBy, walletId: Number(walletId), direction }, userId, walletType)
 
             return res.status(200).json({
                 message: "Busca realizada com sucesso.",
@@ -58,10 +59,9 @@ export const AssetControllers = {
     async getAsset(req: Request, res: Response, next: NextFunction) {
         const userId = res.locals.userId
         try {
-            const { walletId } = req.query as GetAssetSchemaQuery
             const { id } = req.params as GetAssetSchemaParams
 
-            const asset = await AssetService.getAsset(Number(id), Number(walletId), userId)
+            const asset = await AssetService.getAsset(Number(id), userId)
 
             return res.status(200).json({
                 message: "Busca realizada com sucesso.",
@@ -71,5 +71,5 @@ export const AssetControllers = {
         } catch (error) {
             next(error)
         }
-    }
+    },
 }

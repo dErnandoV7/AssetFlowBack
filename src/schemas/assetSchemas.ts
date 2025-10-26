@@ -9,6 +9,20 @@ const assetIdParams = z.object({
             )
 })
 
+const assetUsingCursor = {
+    cursorId:
+        z.number()
+            .refine((n) => Number.isInteger(n), "CursorId deve ser um número inteiro.")
+            .optional(),
+    orderBy:
+        z.enum(["purchasePrice", "quantity", "countTransaction"], "Tipo de ordenação inválida.")
+            .optional(),
+
+    direction:
+        z.enum(["asc", "desc"], "Direção inválida. Use asc ou desc.")
+            .optional()
+}
+
 const assetWalletAndAssetId = z.string()
     .refine((n) => !isNaN(Number(n)) && Number.isInteger(Number(n)), "O ID da carteira deve ser um numero inteiro")
 
@@ -38,9 +52,16 @@ export const deleteAssetSchema = z.object({
 })
 
 export const getAssetsSchema = z.object({
+    body: z.object({
+        ...assetUsingCursor,
+        walletType:
+            z.enum(["investment", "savings", "checking"], "Tipo de carteira inválido.")
+                .optional()
+    }),
+
     query: z.object({
         walletId: assetWalletAndAssetId
-        .optional(),
+            .optional(),
     })
 })
 
@@ -48,15 +69,13 @@ export const getAssetSchema = z.object({
     params: z.object({
         id: assetWalletAndAssetId
     }),
-
-    query: z.object({
-        walletId: assetWalletAndAssetId,
-    })
 })
 
 export type CreateAssetSchema = z.infer<typeof createAssetSchema>["body"]
 export type DeleteAssetSchema = z.infer<typeof deleteAssetSchema>["params"]
 
 export type GetAssetsSchemaQuery = z.infer<typeof getAssetsSchema>["query"]
+export type GetAssetsSchemaBody = z.infer<typeof getAssetsSchema>["body"]
+
 export type GetAssetSchemaParams = z.infer<typeof getAssetSchema>["params"]
-export type GetAssetSchemaQuery = z.infer<typeof getAssetSchema>["query"]
+

@@ -5,13 +5,13 @@ interface HttpError extends Error {
 }
 
 export function errorHandler(err: HttpError, req: Request, res: Response, next: NextFunction) {
-    
-    console.error(err); 
-    
+
+    console.error(err);
+
     const status = err.statusCode || 500;
-    
-    const message = err.statusCode 
-        ? err.message 
+
+    const message = err.statusCode
+        ? err.message
         : 'Ocorreu um erro interno no servidor.';
 
     return res.status(status).json({

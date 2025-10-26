@@ -1,3 +1,4 @@
+import { cursorTo } from "readline"
 import { prisma } from "../config/database"
 import { CreateAsset } from "../types/assetTypes"
 
@@ -27,8 +28,20 @@ export const AssetRepository = {
         })
     },
 
-    async getAssets(where: any) {
-        return prisma.asset.findMany({ where: where })
+
+    async getAssets(
+        where: any,
+        orderBy: Record<string, "asc" | "desc">,
+        skip: number,
+        cursor?: { id: number },
+    ) {
+        return prisma.asset.findMany({
+            where: where,
+            orderBy,
+            ...(cursor?.id ? { cursor: { id: cursor.id } } : {}),
+            skip,
+            take: 8,
+        })
     },
 
     async deleteAsset(id: number) {

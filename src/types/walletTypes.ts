@@ -1,7 +1,6 @@
 export interface CreateWallet {
     name: string,
-    type: "investment" | "savings" | "checking",
-    userId: number
+    type: "investment" | "savings" | "checking"
 }
 
 export interface UpdateWallet {

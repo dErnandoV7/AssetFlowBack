@@ -1,7 +1,7 @@
 import { UserRepository } from "../repositories/userRepository";
-import { CreateUserData, UpdateUserData, UserData } from "../types/userTypes";
+import { UpdateUserData, UserData } from "../types/userTypes";
 import { hashPassword, comparePassword } from "../utils/hashUtils"
-import { BadRequest, NotFoundError, ConflictError } from "../utils/errorUtils";
+import { NotFoundError, ConflictError } from "../utils/errorUtils";
 import { authUtil } from "../utils/jwtUtils";
 
 export const UserService = {

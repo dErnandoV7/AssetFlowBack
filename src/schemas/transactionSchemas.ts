@@ -37,6 +37,29 @@ export const sellAssetSchema = z.object({
     })
 })
 
+export const getAllTransferSchema = z.object({
+    body: z.object({
+        typeFilter:
+            z.enum(["wallet", "typeTransfer"], "Tipo de filtragem inválido.")
+                .optional(),
+
+        filterValue:
+            z.string()
+                .min(1, "Valor de filtro inválido. Não pode ser vazio.")
+                .optional(),
+        page:
+            z.number()
+                .refine((n) => n && Number.isInteger(n), "O número da página deve ser positivo e inteiro.")
+                .optional(),
+
+        pageSize:
+            z.number()
+                .refine((n) => n && Number.isInteger(n), "O número de páginas deve ser positivo e inteiro.")
+                .optional(),
+    })
+})
+
 export type TransferAssetSchema = z.infer<typeof transferAssetSchema>["body"]
 export type BuyAssetSchema = z.infer<typeof buyAssetSchema>["body"]
 export type SellAssetSchema = z.infer<typeof sellAssetSchema>["body"]
+export type GetAllTransferSchema = z.infer<typeof getAllTransferSchema>["body"]

@@ -22,7 +22,7 @@ model Wallet {
   name      String
   type      WalletType
   userId    Int
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   assets    Asset[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -35,7 +35,7 @@ model Asset {
   quantity      Float
   purchasePrice Float
   walletId      Int
-  wallet        Wallet        @relation(fields: [walletId], references: [id])
+  wallet        Wallet        @relation(fields: [walletId], references: [id], onDelete: Cascade)
   transactions  Transaction[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -46,7 +46,7 @@ model Asset {
 model Transaction {
   id        Int             @id @default(autoincrement())
   assetId   Int
-  asset     Asset           @relation(fields: [assetId], references: [id])
+  asset     Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
   type      TransactionType
   date      DateTime        @default(now())
   quantity  Float
@@ -58,7 +58,7 @@ model Transaction {
 model AssetIdentity {
   id            Int     @id @default(autoincrement())
   symbol        String  @unique
-  canonicalName String  
+  canonicalName String
   assets        Asset[]
 }
 

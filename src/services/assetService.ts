@@ -1,18 +1,15 @@
 import { AssetRepository } from "../repositories/assetRepository";
 import { WalletRepository } from "../repositories/walletRepository";
 import { AssetIdentityRepository } from "../repositories/assetIdentityRepository";
-import { CreateAsset } from "../types/assetTypes";
+import { CreateAsset, AssetsCursorData } from "../types/assetTypes";
 import { ConflictError, NotFoundError } from "../utils/errorUtils";
 import { checkSignature } from "../utils/checkSignatureUtil";
-import { Prisma } from "@prisma/client";
 
 export const AssetService = {
     async createAsset(assetData: CreateAsset, walletId: number, userId: number) {
-        const existingWallet = await WalletRepository.findById(walletId)
+        const existingWallet = await WalletRepository.findById(walletId, userId)
 
-        if (!existingWallet) throw new NotFoundError(`Não existe carteira com o ID ${walletId}.`)
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: existingWallet.userId, name: "Carteira" })
+        if (!existingWallet) throw new NotFoundError(`Não existe carteira ID ${walletId} ou não está vinculada ao usuário autenticado.`)
 
         const { identifyId } = assetData
         const assetIdentify = await AssetIdentityRepository.findById(identifyId)
@@ -41,59 +38,59 @@ export const AssetService = {
     },
 
     async deleteAsset(assetId: number, userId: number) {
-        const existingAsset = await AssetRepository.getAsset({ id: assetId })
+        const existingAsset = await AssetRepository.getAsset({
+            id: assetId,
+            wallet: {
+                userId: userId
+            }
+        })
 
-        if (!existingAsset) throw new NotFoundError("Não existe Ativo vinculado ao ID informado.")
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: existingAsset.wallet.userId, name: "Carteira" })
+        if (!existingAsset)
+            throw new NotFoundError(`Não existe ativo ID ${assetId} ou não está vinculado ao usuário autenticado.`)
 
         await AssetRepository.deleteAsset(assetId)
     },
 
-    async getAssets(walletId: number, userId: number) {
-        let where: any = {}
-
-        if (walletId) {
-            const existingWallet = await WalletRepository.findById(walletId)
-
-            if (!existingWallet) throw new NotFoundError(`Não existe Carteira vinculada ao ID ${walletId}.`)
-
-            checkSignature({ id: userId, name: "Usuário" }, { id: existingWallet.userId, name: "Carteira" })
-
-
-            where = {
-                walletId: walletId
-            }
-        } else {
-            where = {
-                wallet: {
-                    userId: userId
-                }
+    async getAssets(assetCursorData: AssetsCursorData, userId: number, walletType: string | undefined) {
+        let where: any = {
+            wallet: {
+                userId: userId
             }
         }
 
-        const assets = await AssetRepository.getAssets(where)
+        const { walletId, cursorId, orderBy, direction } = assetCursorData
+
+        if (walletId) {
+            const existingWallet = await WalletRepository.findById(walletId, userId)
+
+            if (!existingWallet) throw new NotFoundError(`Não existe carteira ID ${walletId} ou não está vinculada ao usuário autenticado.`)
+
+            where.walletId = walletId
+        }
+
+        if (walletType) where.wallet.type = walletType
+
+        const currentOrderBy: Record<string, "asc" | "desc"> = {
+            [orderBy || "id"]: direction || "asc"
+        }
+
+        const currentCursor = cursorId ? { id: cursorId } : undefined
+        const skip = cursorId ? 1 : 0
+
+        const assets = await AssetRepository.getAssets(where, currentOrderBy, skip, currentCursor)
 
         return assets
     },
 
-    async getAsset(assetId: number, walletId: number, userId: number) {
-        const wallet = await WalletRepository.findById(walletId)
-
-        if (!wallet) throw new NotFoundError(`Não existe Carteira vinculada ao ID ${walletId}.`)
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: wallet.userId, name: "Carteira" })
-
-        const asset = await AssetRepository.getAsset(
-            {
-                id: assetId,
-                wallet: {
-                    id: walletId
-                }
+    async getAsset(assetId: number, userId: number) {
+        const asset = await AssetRepository.getAsset({
+            id: assetId,
+            wallet: {
+                userId: userId
             }
-        )
+        })
 
-        if (!asset) throw new NotFoundError(`Na carteira ID ${walletId}, não existe Ativo ID ${assetId}.`)
+        if (!asset) throw new NotFoundError(`Ativo ID ${assetId} não existe ou não pertence ao usuário autenticado.`)
 
         return asset
     }

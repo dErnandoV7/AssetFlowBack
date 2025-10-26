@@ -9,7 +9,7 @@ export const WalletControllers = {
         try {
             const { name, type } = req.body as CreateWalletSchema
 
-            const createdWallet = await WalletService.createWallet({ name, type, userId })
+            const createdWallet = await WalletService.createWallet({ name, type }, userId)
 
             return res.status(201).json({
                 message: "Carteira criada com sucesso!.",

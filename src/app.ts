@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import userRouter from "./routes/userRouter"
 import walletRouter from "./routes/walletRouter"
 import assetRouter from "./routes/assetRouter"
-import assetIdentityRouter from "./routes/assetIdentityRouter"
+import assetIdentityRouter from "./routes/transactionRouter"
 
 import { errorHandler } from './middlewares/errorMiddleware';
 

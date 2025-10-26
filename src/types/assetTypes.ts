@@ -10,3 +10,17 @@ export interface UpdateAsset {
     quantity?: number,
     purchasePrice?: number,
 }
+
+export interface AssetCursorData {
+    cursorId?: number,
+    orderBy?: "purchasePrice" | "quantity" | "countTransaction",
+    direction?: "asc" | "desc",
+    walletId?: number
+}
+
+export interface AssetsCursorData {
+    cursorId?: number,
+    orderBy?: "purchasePrice" | "quantity" | "countTransaction",
+    direction?: "asc" | "desc",
+    walletId?: number
+}

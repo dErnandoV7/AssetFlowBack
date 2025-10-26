@@ -1,0 +1,31 @@
+Paginação para transações
+- listar transações do usuário, assetId -> wallet -> user (FILTRO PADRAO) - Nova rota somente para isso - serviceZ - FEITO
+
+- filtragem: tipo de transação - WHERE montado no service - serviceZ - FEITO
+
+- filtragem: transações de determinada carteira do usuario - WHERE montado no service - serviceZ - FEITO
+
+Filtragem e ordenação para ativos: 
+- ativos de determinada carteira - FEITO
+
+- ativos que estão em determinadas carteiras e que são de determinado tipo, ex: todos os ativos que estão em carteiras de investimentos - uso de AssetRepository.getAssets, aproveitando a possibilidade de usar WHERE montado em AssetService.getAssets - FEITO (aplicado cursor)
+
+- filtro por busca (nome canônico do tipo do ativo (identityAsset)) - COMPARAR search com identityAsset.canonicName - serviceY - A FAZER
+
+- ordenar por: ativos com maior numero de preço unitário pago - ServiceGetAssetsUsingCursor - FEITO
+
+- ordenar por: ativos com maior quantidade de ativos - ServiceGetAssetsUsingCursor - FEITO
+
+- ordenar por: ativos com maior quantidade de transações - ServiceGetAssetsUsingCursor
+
+
+Services:
+
+serviceY (filtro por busca){
+    verifica a ordenação que esta ativada (front) e aplica o orderBy de acordo com a ordenação informada 
+}
+
+paginação: -> page, pageSize, 
+
+take = pageSize
+skip = (page - 1) * pageSize

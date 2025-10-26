@@ -5,24 +5,20 @@ import { NotFoundError } from "../utils/errorUtils";
 import { checkSignature } from "../utils/checkSignatureUtil";
 
 export const WalletService = {
-    async createWallet(walletData: CreateWallet) {
-        const { userId } = walletData
-
+    async createWallet(walletData: CreateWallet, userId: number) {
         const existingUser = await UserRepository.findById(userId)
 
         if (!existingUser) throw new NotFoundError(`Não existe usuário com o ID ${userId}`)
 
-        const createdWallet = await WalletRepository.createWallet(walletData)
+        const createdWallet = await WalletRepository.createWallet(walletData, userId)
 
         return createdWallet
     },
 
     async updateWallet(dataWallet: UpdateWallet, walletId: number, userId: number) {
-        const existingWallet = await WalletRepository.findById(walletId)
+        const existingWallet = await WalletRepository.findById(walletId, userId)
 
-        if (!existingWallet) throw new NotFoundError(`Não existe wallet com o ID ${walletId}`)
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: existingWallet.userId, name: "Carteira" })
+        if (!existingWallet) throw new NotFoundError(`Não existe wallet com o ID ${walletId} ou não está vinculado ao usuário logado.`)
 
         const updatedWallet = await WalletRepository.udpateWallet({
             name: dataWallet.name,
@@ -33,11 +29,9 @@ export const WalletService = {
     },
 
     async deleteWallet(walletId: number, userId: number) {
-        const existingWallet = await WalletRepository.findById(walletId)
+        const existingWallet = await WalletRepository.findById(walletId, userId)
 
-        if (!existingWallet) throw new NotFoundError(`Não existe wallet com o ID ${walletId}`)
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: existingWallet.userId, name: "Carteira" })
+        if (!existingWallet) throw new NotFoundError(`Não existe wallet com o ID ${walletId} ou não está vinculado ao usuário logado.`)
 
         await WalletRepository.deleteWallet(walletId)
 
@@ -45,11 +39,9 @@ export const WalletService = {
     },
 
     async getWallet(walletId: number, userId: number) {
-        const wallet = await WalletRepository.findById(walletId)
+        const wallet = await WalletRepository.findById(walletId, userId)
 
-        if (!wallet) throw new NotFoundError(`Não existe wallet com o ID ${walletId}`)
-
-        checkSignature({ id: userId, name: "Usuário" }, { id: wallet.userId, name: "Carteira" })
+        if (!wallet) throw new NotFoundError(`Não existe wallet com o ID ${walletId} ou não está vinculado ao usuário logado.`)
 
         return wallet
     },
