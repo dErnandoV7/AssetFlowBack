@@ -42,9 +42,9 @@ export const AssetControllers = {
         const userId = res.locals.userId
         try {
             const { cursorId, orderBy, walletType, direction } = req.body as GetAssetsSchemaBody
-            const { walletId } = req.query as GetAssetsSchemaQuery
+            const { walletId, search } = req.query as GetAssetsSchemaQuery
 
-            const assets = await AssetService.getAssets({ cursorId, orderBy, walletId: Number(walletId), direction }, userId, walletType)
+            const assets = await AssetService.getAssets({ cursorId, orderBy, walletId: Number(walletId), direction }, userId, walletType, search)
 
             return res.status(200).json({
                 message: "Busca realizada com sucesso.",

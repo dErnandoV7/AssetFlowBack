@@ -51,7 +51,7 @@ export const AssetService = {
         await AssetRepository.deleteAsset(assetId)
     },
 
-    async getAssets(assetCursorData: AssetsCursorData, userId: number, walletType: string | undefined) {
+    async getAssets(assetCursorData: AssetsCursorData, userId: number, walletType?: string, search?: string) {
         let where: any = {
             wallet: {
                 userId: userId
@@ -69,6 +69,12 @@ export const AssetService = {
         }
 
         if (walletType) where.wallet.type = walletType
+        if (search) where.identify = {
+            OR: [
+                { canonicalName: { contains: search, mode: 'insensitive' } },
+                { symbol: { contains: search, mode: 'insensitive' } }
+            ]
+        }
 
         const currentOrderBy: Record<string, "asc" | "desc"> = {
             [orderBy || "id"]: direction || "asc"

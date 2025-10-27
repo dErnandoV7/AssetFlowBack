@@ -62,6 +62,10 @@ export const getAssetsSchema = z.object({
     query: z.object({
         walletId: assetWalletAndAssetId
             .optional(),
+
+        search:
+            z.string()
+                .optional()
     })
 })
 

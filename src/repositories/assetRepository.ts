@@ -41,6 +41,10 @@ export const AssetRepository = {
             ...(cursor?.id ? { cursor: { id: cursor.id } } : {}),
             skip,
             take: 8,
+            include: {
+                identify: true,
+                wallet: true
+            }
         })
     },
 
