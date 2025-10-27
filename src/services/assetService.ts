@@ -3,7 +3,8 @@ import { WalletRepository } from "../repositories/walletRepository";
 import { AssetIdentityRepository } from "../repositories/assetIdentityRepository";
 import { CreateAsset, AssetsCursorData } from "../types/assetTypes";
 import { ConflictError, NotFoundError } from "../utils/errorUtils";
-import { checkSignature } from "../utils/checkSignatureUtil";
+import { Prisma } from "@prisma/client";
+import { TypeWallet } from "../types/walletTypes";
 
 export const AssetService = {
     async createAsset(assetData: CreateAsset, walletId: number, userId: number) {
@@ -51,11 +52,20 @@ export const AssetService = {
         await AssetRepository.deleteAsset(assetId)
     },
 
-    async getAssets(assetCursorData: AssetsCursorData, userId: number, walletType?: string, search?: string) {
-        let where: any = {
+    async getAssets(assetCursorData: AssetsCursorData, userId: number, walletType?: TypeWallet, search?: string) {
+        let where: Prisma.AssetWhereInput = {
             wallet: {
-                userId: userId
-            }
+                userId: userId,
+                ...(walletType ? { type: walletType } : {}),
+            },
+            ...(search ? {
+                identify: {
+                    OR: [
+                        { canonicalName: { contains: search, mode: 'insensitive' } },
+                        { symbol: { contains: search, mode: 'insensitive' } }
+                    ]
+                }
+            } : {})
         }
 
         const { walletId, cursorId, orderBy, direction } = assetCursorData
@@ -66,14 +76,6 @@ export const AssetService = {
             if (!existingWallet) throw new NotFoundError(`Não existe carteira ID ${walletId} ou não está vinculada ao usuário autenticado.`)
 
             where.walletId = walletId
-        }
-
-        if (walletType) where.wallet.type = walletType
-        if (search) where.identify = {
-            OR: [
-                { canonicalName: { contains: search, mode: 'insensitive' } },
-                { symbol: { contains: search, mode: 'insensitive' } }
-            ]
         }
 
         const currentOrderBy: Record<string, "asc" | "desc"> = {

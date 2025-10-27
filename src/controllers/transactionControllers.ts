@@ -71,16 +71,16 @@ export const TransactionControllers = {
         const userId = res.locals.userId
 
         try {
-            const { filterValue, typeFilter, page, pageSize } = req.body as GetAllTransferSchema
+            const { typeTransfer, walletId, walletType, page, pageSize } = req.body as GetAllTransferSchema
 
-            const { count, transactions } = await TransactionService.getAllTransfer({ filterValue, typeFilter, page, pageSize }, userId)
+            const { count, transactions } = await TransactionService.getAllTransfer({ page, pageSize, typeTransfer, walletId, walletType }, userId)
 
             return res.status(200).json({
                 message: "Transferências buscadas com sucesso.",
                 transfers: transactions,
-                total: count 
+                total: count
             })
-            
+
         } catch (error) {
             next(error)
         }

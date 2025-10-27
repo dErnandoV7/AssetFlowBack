@@ -1,11 +1,10 @@
 import { prisma } from "../config/database"
+import { Prisma } from "@prisma/client"
 import { AssetRepository } from "../repositories/assetRepository"
 import { WalletRepository } from "../repositories/walletRepository"
 import { AssetIdentityRepository } from "../repositories/assetIdentityRepository"
 import { TransactionRepository } from "../repositories/transactionRepository"
 import { BadRequest, NotFoundError } from "../utils/errorUtils"
-import { VALID_TRANSFER_TYPES, FILTER_TYPE_TRANSFER, FILTER_TYPE_WALLET } from "../utils/transactionUtil"
-import { checkSignature } from "../utils/checkSignatureUtil"
 import { TransferAsset, BuyAsset, SellAsset, FilterTransferData } from "../types/transactionTypes";
 
 export const TransactionService = {
@@ -170,14 +169,23 @@ export const TransactionService = {
     },
 
     async getAllTransfer(filterData: FilterTransferData, userId: number) {
-        const { filterValue, typeFilter, page, pageSize } = filterData
+        const { typeTransfer, walletId, walletType, page, pageSize } = filterData
 
-        let where: any = {
+        if (walletId) {
+            const wallet = await WalletRepository.findById(walletId, userId)
+
+            if (!wallet || wallet.userId !== userId) throw new NotFoundError(`Não existe carteira ID ${walletId} no sistema ou não pertence ao usuário autenticado.`)
+        }
+
+        let where: Prisma.TransactionWhereInput = {
             asset: {
                 wallet: {
                     userId
-                }
-            }
+                },
+                ...(walletId ? { walletId } : {}),
+                ...(walletType ? { wallet: { type: walletType } } : {})
+            },
+            ...(typeTransfer ? { type: typeTransfer } : {})
         }
 
         let skip: number = 0
@@ -185,27 +193,6 @@ export const TransactionService = {
 
         if (page && pageSize) skip = (page - 1) * pageSize
         if (pageSize) take = pageSize
-
-        if (filterValue && typeFilter) {
-            switch (typeFilter) {
-
-                case FILTER_TYPE_TRANSFER:
-                    if (!VALID_TRANSFER_TYPES.includes(filterValue)) throw new BadRequest("O valor do filtro (transferência) é inválido")
-                    where.type = filterValue
-
-                    break
-
-                case FILTER_TYPE_WALLET:
-                    const walletId = Number(filterValue)
-
-                    if (!Number.isInteger(walletId) || walletId <= 0) throw new BadRequest("O valor do filtro (wallet) é inválido. Deve ser um valor númerico, inteiro e positivo.")
-                    where.asset.walletId = walletId
-                    break
-
-                default:
-                    break
-            }
-        }
 
         const transactions = await TransactionRepository.getTransaction(where, skip, take)
         const count = await TransactionRepository.countTransaction(where)

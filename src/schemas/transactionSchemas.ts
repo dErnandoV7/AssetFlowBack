@@ -1,4 +1,6 @@
 import z from "zod"
+import { VALID_TRANSFER_TYPES } from "../utils/transactionUtil"
+import { TYPES_WALLET } from "../utils/assetsUtils"
 
 const walletAndAssetAndIdentifyAssetId = z.number()
     .refine((n) => Number.isInteger(n), "O ID da Carteira remetente deve ser um número inteiro.")
@@ -39,14 +41,15 @@ export const sellAssetSchema = z.object({
 
 export const getAllTransferSchema = z.object({
     body: z.object({
-        typeFilter:
-            z.enum(["wallet", "typeTransfer"], "Tipo de filtragem inválido.")
-                .optional(),
+        walletId: walletAndAssetAndIdentifyAssetId
+            .optional(),
 
-        filterValue:
-            z.string()
-                .min(1, "Valor de filtro inválido. Não pode ser vazio.")
-                .optional(),
+        typeTransfer: z.enum(VALID_TRANSFER_TYPES, "Tipo de transferência inválido.")
+            .optional(),
+
+        walletType: z.enum(TYPES_WALLET, "Tipo de carteira inválido.")
+            .optional(),
+
         page:
             z.number()
                 .refine((n) => n && Number.isInteger(n), "O número da página deve ser positivo e inteiro.")

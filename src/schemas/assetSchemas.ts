@@ -1,4 +1,5 @@
 import z from "zod"
+import { TYPES_WALLET, ASSETS_ORDER_BY } from "../utils/assetsUtils"
 
 const assetIdParams = z.object({
     id:
@@ -15,7 +16,7 @@ const assetUsingCursor = {
             .refine((n) => Number.isInteger(n), "CursorId deve ser um número inteiro.")
             .optional(),
     orderBy:
-        z.enum(["purchasePrice", "quantity", "countTransaction"], "Tipo de ordenação inválida.")
+        z.enum(ASSETS_ORDER_BY, "Tipo de ordenação inválida.")
             .optional(),
 
     direction:
@@ -46,7 +47,6 @@ export const createAssetSchema = z.object({
     })
 })
 
-
 export const deleteAssetSchema = z.object({
     params: assetIdParams,
 })
@@ -55,7 +55,7 @@ export const getAssetsSchema = z.object({
     body: z.object({
         ...assetUsingCursor,
         walletType:
-            z.enum(["investment", "savings", "checking"], "Tipo de carteira inválido.")
+            z.enum(TYPES_WALLET, "Tipo de carteira inválido.")
                 .optional()
     }),
 

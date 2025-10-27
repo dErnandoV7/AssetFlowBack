@@ -1,5 +1,3 @@
-export const VALID_TRANSFER_TYPES = ["buy", "sell", "transfer"];
+import { TypeTransfer } from "../types/transactionTypes";
 
-export const FILTER_TYPE_TRANSFER = "typeTransfer";
-
-export const FILTER_TYPE_WALLET = "wallet";
+export const VALID_TRANSFER_TYPES: TypeTransfer[] = ["buy", "sell", "transfer"];

@@ -1,9 +1,11 @@
 export interface CreateWallet {
     name: string,
-    type: "investment" | "savings" | "checking"
+    type: TypeWallet
 }
 
 export interface UpdateWallet {
     name?: string,
-    type?: "investment" | "savings" | "checking",
+    type?: TypeWallet,
 }
+
+export type TypeWallet = "investment" | "savings" | "checking"

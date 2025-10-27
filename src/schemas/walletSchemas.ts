@@ -1,4 +1,5 @@
 import z from "zod"
+import { TYPES_WALLET } from "../utils/assetsUtils";
 
 const walletId = z.object({
     id: z.string().refine(
@@ -7,7 +8,7 @@ const walletId = z.object({
     )
 });
 
-const walletTypeEnum = z.enum(["investment", "savings", "checking"], "O tipo da carteira é inválido.");
+const walletTypeEnum = z.enum(TYPES_WALLET, "O tipo da carteira é inválido.");
 
 export const createWalletSchema = z.object({
     body: z.object({

@@ -13,14 +13,16 @@ export interface UpdateAsset {
 
 export interface AssetCursorData {
     cursorId?: number,
-    orderBy?: "purchasePrice" | "quantity" | "countTransaction",
+    orderBy?: OrderByAssets,
     direction?: "asc" | "desc",
     walletId?: number
 }
 
 export interface AssetsCursorData {
     cursorId?: number,
-    orderBy?: "purchasePrice" | "quantity" | "countTransaction",
+    orderBy?: OrderByAssets,
     direction?: "asc" | "desc",
     walletId?: number
 }
+
+export type OrderByAssets = "purchasePrice" | "quantity" | "countTransaction"

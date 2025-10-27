@@ -2,7 +2,6 @@ import { WalletRepository } from "../repositories/walletRepository";
 import { UserRepository } from "../repositories/userRepository";
 import { CreateWallet, UpdateWallet } from "../types/walletTypes";
 import { NotFoundError } from "../utils/errorUtils";
-import { checkSignature } from "../utils/checkSignatureUtil";
 
 export const WalletService = {
     async createWallet(walletData: CreateWallet, userId: number) {

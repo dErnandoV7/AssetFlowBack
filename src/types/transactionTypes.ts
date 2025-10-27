@@ -1,3 +1,5 @@
+import { TypeWallet } from "./walletTypes"
+
 export interface TransferAsset {
     sourceWalletId: number,
     targetWalletId: number,
@@ -20,10 +22,11 @@ export interface SellAsset {
 }
 
 export interface FilterTransferData {
-    typeFilter: TransferFilter,
-    filterValue: string | undefined,
+    typeTransfer?: TypeTransfer,
+    walletId?: number,
+    walletType?: TypeWallet,
     page?: number,
     pageSize?: number
 }
 
-export type TransferFilter = "typeTransfer" | "wallet" | undefined
+export type TypeTransfer = "buy" | "sell" | "transfer" 
