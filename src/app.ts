@@ -12,7 +12,8 @@ import { errorHandler } from './middlewares/errorMiddleware';
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:3000",
+    // origin: "http://localhost:3000",
+    origin: "https://asset-flow-front.vercel.app",
     credentials: true,
 }));
 
