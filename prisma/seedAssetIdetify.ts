@@ -1,8 +1,10 @@
-import { prisma } from "../src/config/database"
-import { ASSET_IDENTITIES } from "../src/utils/assetIdentifyUtil"
+import { PrismaClient } from "@prisma/client";
+import { ASSET_IDENTITIES } from "../src/utils/assetIdentifyUtil";
+
+const prisma = new PrismaClient();
 
 async function main() {
-    console.log('Iniciando Asset Identity Seeding...');
+    console.log("Iniciando Asset Identity Seeding...");
 
     for (const asset of ASSET_IDENTITIES) {
         await prisma.assetIdentity.upsert({
@@ -13,7 +15,6 @@ async function main() {
                 canonicalName: asset.canonicalName.toLowerCase(),
             },
         });
-
     }
 
     console.log(`Seeding concluído! Foram processados ${ASSET_IDENTITIES.length} ativos.`);
@@ -25,5 +26,5 @@ main()
         process.exit(1);
     })
     .finally(async () => {
-        await prisma.$disconnect();
+        prisma.$disconnect();
     });
