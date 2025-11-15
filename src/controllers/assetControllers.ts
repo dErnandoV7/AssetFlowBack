@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
 import { AssetService } from "../services/assetService";
-import { CreateAssetSchema, DeleteAssetSchema, GetAssetSchemaParams, GetAssetsSchemaQuery, GetAssetsSchemaBody } from "../schemas/assetSchemas";
+import { CreateAssetSchema, DeleteAssetSchema, GetAssetSchemaParams, GetAssetsSchemaQuery } from "../schemas/assetSchemas";
 
 export const AssetControllers = {
     async createAsset(req: Request, res: Response, next: NextFunction) {
@@ -41,14 +41,14 @@ export const AssetControllers = {
     async getAssets(req: Request, res: Response, next: NextFunction) {
         const userId = res.locals.userId
         try {
-            const { cursorId, orderBy, walletType, direction } = req.body as GetAssetsSchemaBody
-            const { walletId, search } = req.query as GetAssetsSchemaQuery
+            const { walletId, search, cursorId, direction, orderBy, walletType } = req.query as GetAssetsSchemaQuery
 
-            const assets = await AssetService.getAssets({ cursorId, orderBy, walletId: Number(walletId), direction }, userId, walletType, search)
+            const { assets, countAssets } = await AssetService.getAssets({ cursorId: Number(cursorId), orderBy, walletId: Number(walletId), direction }, userId, walletType, search)
 
             return res.status(200).json({
                 message: "Busca realizada com sucesso.",
-                assets
+                assets,
+                total: countAssets
             })
 
         } catch (error) {

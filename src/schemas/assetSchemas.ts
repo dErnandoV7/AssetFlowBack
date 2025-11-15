@@ -12,8 +12,8 @@ const assetIdParams = z.object({
 
 const assetUsingCursor = {
     cursorId:
-        z.number()
-            .refine((n) => Number.isInteger(n), "CursorId deve ser um número inteiro.")
+        z.string()
+            .refine((n) => Number.isInteger(Number(n)), "CursorId deve ser um número inteiro.")
             .optional(),
     orderBy:
         z.enum(ASSETS_ORDER_BY, "Tipo de ordenação inválida.")
@@ -52,14 +52,11 @@ export const deleteAssetSchema = z.object({
 })
 
 export const getAssetsSchema = z.object({
-    body: z.object({
+    query: z.object({
         ...assetUsingCursor,
         walletType:
             z.enum(TYPES_WALLET, "Tipo de carteira inválido.")
-                .optional()
-    }),
-
-    query: z.object({
+                .optional(),
         walletId: assetWalletAndAssetId
             .optional(),
 
@@ -79,7 +76,6 @@ export type CreateAssetSchema = z.infer<typeof createAssetSchema>["body"]
 export type DeleteAssetSchema = z.infer<typeof deleteAssetSchema>["params"]
 
 export type GetAssetsSchemaQuery = z.infer<typeof getAssetsSchema>["query"]
-export type GetAssetsSchemaBody = z.infer<typeof getAssetsSchema>["body"]
 
 export type GetAssetSchemaParams = z.infer<typeof getAssetSchema>["params"]
 

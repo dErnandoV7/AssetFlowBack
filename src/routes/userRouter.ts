@@ -1,6 +1,6 @@
 import { UserController } from "../controllers/userControllers";
 import { Router } from "express";
-import { createUserSchema, deleteUserSchema, getUserByIdSchema, updateUserSchema, loginUserSchema } from "../schemas/userSchemas";
+import { createUserSchema, deleteUserSchema, getUserByIdSchema, updateUserSchema, loginUserSchema, comparePasswordSchema } from "../schemas/userSchemas";
 import { validate } from "../middlewares/validateMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
 const router = Router()
@@ -16,5 +16,7 @@ router.put("/update-user/:id", authMiddleware, validate(updateUserSchema), UserC
 router.delete("/delete-user/:id", authMiddleware, validate(deleteUserSchema), UserController.deleteUser)
 
 router.post("/login-user", validate(loginUserSchema), UserController.loginUser)
+
+router.post("/users/:id/compare-password", authMiddleware, validate(comparePasswordSchema), UserController.comparePassword)
 
 export default router

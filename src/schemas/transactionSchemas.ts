@@ -40,8 +40,9 @@ export const sellAssetSchema = z.object({
 })
 
 export const getAllTransferSchema = z.object({
-    body: z.object({
-        walletId: walletAndAssetAndIdentifyAssetId
+    query: z.object({
+        walletId: z.string()
+            .refine((n) => Number.isInteger(Number(n)), "O ID da Carteira remetente deve ser um número inteiro.")
             .optional(),
 
         typeTransfer: z.enum(VALID_TRANSFER_TYPES, "Tipo de transferência inválido.")
@@ -51,13 +52,8 @@ export const getAllTransferSchema = z.object({
             .optional(),
 
         page:
-            z.number()
-                .refine((n) => n && Number.isInteger(n), "O número da página deve ser positivo e inteiro.")
-                .optional(),
-
-        pageSize:
-            z.number()
-                .refine((n) => n && Number.isInteger(n), "O número de páginas deve ser positivo e inteiro.")
+            z.string()
+                .refine((n) => n && Number.isInteger(Number(n)), "O número da página deve ser positivo e inteiro.")
                 .optional(),
     })
 })
@@ -65,4 +61,4 @@ export const getAllTransferSchema = z.object({
 export type TransferAssetSchema = z.infer<typeof transferAssetSchema>["body"]
 export type BuyAssetSchema = z.infer<typeof buyAssetSchema>["body"]
 export type SellAssetSchema = z.infer<typeof sellAssetSchema>["body"]
-export type GetAllTransferSchema = z.infer<typeof getAllTransferSchema>["body"]
+export type GetAllTransferSchema = z.infer<typeof getAllTransferSchema>["query"]

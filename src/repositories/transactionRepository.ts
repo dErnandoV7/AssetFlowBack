@@ -6,7 +6,30 @@ export const TransactionRepository = {
         skip: number,
         take: number
     ) {
-        return prisma.transaction.findMany({ where, take, skip })
+        return prisma.transaction.findMany({
+            where,
+            take,
+            skip,
+            orderBy: {
+                createdAt: "desc"
+            },
+            include: {
+                asset: {
+                    select: {
+                        identify: {
+                            select: {
+                                canonicalName: true
+                            }
+                        },
+                        wallet: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
     },
 
     async countTransaction(where: any) {

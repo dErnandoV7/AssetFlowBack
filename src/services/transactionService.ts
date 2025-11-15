@@ -29,15 +29,23 @@ export const TransactionService = {
 
         if (sourceAsset.quantity < quantity) throw new BadRequest("A quantidade a ser transferida deve ser maior ou igual a quantidade presente no Ativo remetente")
 
-        const transaction = await prisma.$transaction(async (tx) => {
-            await tx.asset.update({
-                where: { id: sourceAsset.id },
-                data: {
-                    quantity: sourceAsset.quantity - quantity
-                }
-            })
+        const removeSourceAsset = quantity === sourceAsset.quantity
 
-            await tx.asset.upsert({
+        const transaction = await prisma.$transaction(async (tx) => {
+
+            if (removeSourceAsset) {
+                await tx.asset.delete({ where: { id: sourceAsset.id } })
+
+            } else {
+                await tx.asset.update({
+                    where: { id: sourceAsset.id },
+                    data: {
+                        quantity: sourceAsset.quantity - quantity
+                    }
+                })
+            }
+
+            const targetAsset = await tx.asset.upsert({
                 where: {
                     identifyId_walletId: {
                         identifyId: identifyId,
@@ -57,7 +65,7 @@ export const TransactionService = {
 
             const transfer = await tx.transaction.create({
                 data: {
-                    assetId: sourceAsset.id,
+                    assetId: targetAsset.id,
                     type: "transfer",
                     quantity,
                     price: 0
@@ -145,7 +153,16 @@ export const TransactionService = {
 
         if (asset.quantity < quantity) throw new BadRequest("Saldo insuficiente para realizar a venda.")
 
+        const removeAsset = quantity === asset.quantity
+
         const transaction = await prisma.$transaction(async (tx) => {
+
+            if (removeAsset) {
+                await tx.asset.delete({ where: { id: assetId } })
+
+                return { transfer: null, updatedAsset: null }
+            }
+
             const updatedAsset = await tx.asset.update({
                 where: { id: assetId },
                 data: {
@@ -162,17 +179,17 @@ export const TransactionService = {
                 }
             })
 
-            return { updatedAsset, transfer }
+            return { transfer, updatedAsset }
         })
 
         return transaction
     },
 
     async getAllTransfer(filterData: FilterTransferData, userId: number) {
-        const { typeTransfer, walletId, walletType, page, pageSize } = filterData
+        const { typeTransfer, walletId, walletType, page } = filterData
 
         if (walletId) {
-            const wallet = await WalletRepository.findById(walletId, userId)
+            const wallet = await WalletRepository.findById(Number(walletId), userId)
 
             if (!wallet || wallet.userId !== userId) throw new NotFoundError(`Não existe carteira ID ${walletId} no sistema ou não pertence ao usuário autenticado.`)
         }
@@ -182,7 +199,7 @@ export const TransactionService = {
                 wallet: {
                     userId
                 },
-                ...(walletId ? { walletId } : {}),
+                ...(walletId ? { walletId: Number(walletId) } : {}),
                 ...(walletType ? { wallet: { type: walletType } } : {})
             },
             ...(typeTransfer ? { type: typeTransfer } : {})
@@ -191,10 +208,12 @@ export const TransactionService = {
         let skip: number = 0
         let take: number = 10
 
-        if (page && pageSize) skip = (page - 1) * pageSize
-        if (pageSize) take = pageSize
+        const pageNumber = Number(page) || undefined
+
+        if (pageNumber) skip = (pageNumber - 1) * take
 
         const transactions = await TransactionRepository.getTransaction(where, skip, take)
+
         const count = await TransactionRepository.countTransaction(where)
 
         return { transactions, count }

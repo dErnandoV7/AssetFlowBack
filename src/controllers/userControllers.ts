@@ -1,6 +1,6 @@
 import { UserService } from "../services/userService";
 import { Request, Response, NextFunction } from "express"
-import { CreateUserSchema, DeleteUserSchema, GetUserByIdSchema, UpdateUserSchema, LoginUserSchema } from "../schemas/userSchemas"
+import { CreateUserSchema, DeleteUserSchema, GetUserByIdSchema, UpdateUserSchema, LoginUserSchema, ComparePasswordSchema } from "../schemas/userSchemas"
 
 export const UserController = {
     async createUser(req: Request, res: Response, next: NextFunction) {
@@ -91,6 +91,22 @@ export const UserController = {
                 token: validateEmailAndPassword.token
             })
 
+        } catch (error) {
+            next(error)
+        }
+    },
+
+    async comparePassword(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params as ComparePasswordSchema["params"]
+            const { password } = req.body as ComparePasswordSchema["body"]
+
+            const user = await UserService.compareUserPassword(Number(id), password)
+
+            return res.status(200).json({
+                message: "Senha validada com sucesso.",
+                user
+            })
         } catch (error) {
             next(error)
         }

@@ -23,10 +23,9 @@ export interface SellAsset {
 
 export interface FilterTransferData {
     typeTransfer?: TypeTransfer,
-    walletId?: number,
+    walletId?: string,
     walletType?: TypeWallet,
-    page?: number,
-    pageSize?: number
+    page?: string,
 }
 
 export type TypeTransfer = "buy" | "sell" | "transfer" 

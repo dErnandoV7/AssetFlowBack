@@ -1,5 +1,5 @@
 import { prisma } from "../config/database"
-import { UserData, CreateUserData } from "../types/userTypes"
+import { UserData, CreateUserData, UpdateUserData } from "../types/userTypes"
 
 export const UserRepository = {
     async findById(id: number) {
@@ -9,6 +9,18 @@ export const UserRepository = {
                 id: true,
                 name: true,
                 email: true
+            }
+        })
+    },
+
+    async findByIdWithPassword(id: number) {
+        return prisma.user.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                password: true
             }
         })
     },
@@ -58,7 +70,7 @@ export const UserRepository = {
         })
     },
 
-    async updateUser(data: CreateUserData, id: number) {
+    async updateUser(data: UpdateUserData, id: number) {
         return prisma.user.update({
             where: { id },
             data,

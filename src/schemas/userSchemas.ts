@@ -57,6 +57,13 @@ export const loginUserSchema = z.object({
     })
 })
 
+export const comparePasswordSchema = z.object({
+    params: userIdParams,
+    body: z.object({
+        password: userPasswordInBody
+    })
+})
+
 export type CreateUserSchema = z.infer<typeof createUserSchema>["body"]
 export type UpdateUserSchema = {
     params: z.infer<typeof updateUserSchema>["params"],
@@ -65,3 +72,7 @@ export type UpdateUserSchema = {
 export type DeleteUserSchema = z.infer<typeof deleteUserSchema>["params"]
 export type GetUserByIdSchema = z.infer<typeof getUserByIdSchema>["params"]
 export type LoginUserSchema = z.infer<typeof loginUserSchema>["body"]
+export type ComparePasswordSchema = {
+    params: z.infer<typeof comparePasswordSchema>["params"],
+    body: z.infer<typeof comparePasswordSchema>["body"]
+}

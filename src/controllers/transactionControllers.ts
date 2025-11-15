@@ -29,6 +29,13 @@ export const TransactionControllers = {
 
             const { transfer, updatedAsset } = await TransactionService.sellAsset({ assetId, price, quantity }, userId)
 
+            if (!transfer && !updatedAsset) {
+
+                return res.status(201).json({
+                    message: "Venda realizada com sucesso! Ativo excluído por não possuir mais unidades",
+                })
+            }
+
             const { price: priceSell, quantity: quantitySell } = transfer
             const { purchasePrice: priceBuy } = updatedAsset
 
@@ -71,9 +78,9 @@ export const TransactionControllers = {
         const userId = res.locals.userId
 
         try {
-            const { typeTransfer, walletId, walletType, page, pageSize } = req.body as GetAllTransferSchema
+            const { typeTransfer, walletId, walletType, page } = req.query as GetAllTransferSchema
 
-            const { count, transactions } = await TransactionService.getAllTransfer({ page, pageSize, typeTransfer, walletId, walletType }, userId)
+            const { count, transactions } = await TransactionService.getAllTransfer({ page, typeTransfer, walletId, walletType }, userId)
 
             return res.status(200).json({
                 message: "Transferências buscadas com sucesso.",

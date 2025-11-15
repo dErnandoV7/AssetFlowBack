@@ -47,7 +47,7 @@ export const WalletService = {
 
     async getWallets(userId: number) {
         const wallets = await WalletRepository.getWallets(userId)
-
+        
         return wallets
     }
 }

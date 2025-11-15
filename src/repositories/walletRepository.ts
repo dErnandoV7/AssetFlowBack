@@ -1,3 +1,4 @@
+import { includes } from "zod"
 import { prisma } from "../config/database"
 import { CreateWallet, UpdateWallet } from "../types/walletTypes"
 
@@ -30,7 +31,20 @@ export const WalletRepository = {
     },
 
     async getWallets(userId: number) {
-        return prisma.wallet.findMany({ where: { userId } })
+        return prisma.wallet.findMany({
+            where: { userId },
+            orderBy: {
+                createdAt: "desc"
+            },
+            include: {
+                _count: {
+                    select: {
+                        assets: true
+                    }
+                }
+            }
+        }
+        )
     },
 
     async udpateWallet(data: UpdateWallet, id: number) {

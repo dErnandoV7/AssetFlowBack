@@ -1,7 +1,7 @@
 import { UserRepository } from "../repositories/userRepository";
 import { UpdateUserData, UserData } from "../types/userTypes";
 import { hashPassword, comparePassword } from "../utils/hashUtils"
-import { NotFoundError, ConflictError } from "../utils/errorUtils";
+import { NotFoundError, ConflictError, BadRequest } from "../utils/errorUtils";
 import { authUtil } from "../utils/jwtUtils";
 
 export const UserService = {
@@ -50,7 +50,8 @@ export const UserService = {
 
         const updatedUser = await UserRepository.updateUser({
             email: userData.email,
-            name: userData.name
+            name: userData.name,
+            password: userData.password
         }, userId)
 
         return updatedUser
@@ -82,6 +83,22 @@ export const UserService = {
                 id: user.id, name: user.name, email: user.email
             },
             token
+        }
+    },
+
+    async compareUserPassword(userId: number, password: string) {
+        const user = await UserRepository.findByIdWithPassword(userId)
+
+        if (!user) throw new NotFoundError(`Usuário com ID ${userId} não foi encontrado.`)
+
+        const isSamePassword = await comparePassword(password, user.password)
+
+        if (!isSamePassword) throw new BadRequest("Senha inválida.")
+
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email
         }
     }
 }

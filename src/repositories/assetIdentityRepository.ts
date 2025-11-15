@@ -5,5 +5,9 @@ export const AssetIdentityRepository = {
         return prisma.assetIdentity.findUnique({
             where: { id }
         })
+    },
+
+    async findAll() {
+        return prisma.assetIdentity.findMany()
     }
 }

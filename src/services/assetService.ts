@@ -87,7 +87,9 @@ export const AssetService = {
 
         const assets = await AssetRepository.getAssets(where, currentOrderBy, skip, currentCursor)
 
-        return assets
+        const countAssets = await AssetRepository.countAsset(where)
+
+        return { assets, countAssets }
     },
 
     async getAsset(assetId: number, userId: number) {

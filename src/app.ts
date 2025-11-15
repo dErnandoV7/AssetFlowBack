@@ -1,13 +1,20 @@
 import 'dotenv/config';
+import cors from "cors";
 import express, { Request, Response } from 'express';
 import userRouter from "./routes/userRouter"
 import walletRouter from "./routes/walletRouter"
 import assetRouter from "./routes/assetRouter"
-import assetIdentityRouter from "./routes/transactionRouter"
+import transactionsRouter from "./routes/transactionRouter"
+import assetIdentityRouter from "./routes/assetIdentityRouter"
 
 import { errorHandler } from './middlewares/errorMiddleware';
 
 const app = express();
+
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+}));
 
 app.use(express.json());
 
@@ -18,6 +25,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use("/", userRouter)
 app.use("/", walletRouter)
 app.use("/", assetRouter)
+app.use("/", transactionsRouter)
 app.use("/", assetIdentityRouter)
 
 app.use(errorHandler)

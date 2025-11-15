@@ -52,4 +52,12 @@ export const AssetRepository = {
         return prisma.asset.delete({ where: { id } })
     },
 
+    async countAsset(
+        where: any
+    ) {
+        return prisma.asset.count({
+            where
+        })
+    }
+
 }
